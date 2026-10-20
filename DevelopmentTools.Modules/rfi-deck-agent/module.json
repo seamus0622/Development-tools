@@ -1,6 +1,6 @@
 {
   "id": "rfi-deck-agent",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "hostVersion": "3.2.4",
   "RevitVersion": ["2024"],
   "assembly": "RfiDeckAgent.dll",
@@ -14,6 +14,7 @@
     "Revit 2024：未設定 AI AGENT 資料夾時先開啟設定",
     "Revit 2024：釋疑擷取截圖成功，樓層／柱線／選取元件正確，模型未被修改",
     "Revit 2024：產生簡報輸出 PPT 可開啟；收件匣、成果資料夾、共用簡報可開啟",
+    "Python 程式由 DLL 解壓到 %LOCALAPPDATA%\\DT_AIAgent\\python\\<雜湊> 並可執行；對照圖說可找到既有索引與問題庫",
     "回退：移除模組資料夾後重建，原有功能正常"
   ]
 }

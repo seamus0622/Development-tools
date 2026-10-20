@@ -6,6 +6,10 @@
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Python 程式內嵌進 DLL，執行時解壓到 %LOCALAPPDATA%\DT_AIAgent\python\<雜湊>\（安裝包只帶 DLL，不需改打包流程） -->
+    <EmbeddedResource Include="python\*.py;python\requirements.txt" LogicalName="RfiDeckAgent.python.%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
     <!-- JavaScriptSerializer：設定檔與收件匣 item.json -->
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>

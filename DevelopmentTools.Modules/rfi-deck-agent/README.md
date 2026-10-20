@@ -19,7 +19,7 @@
 | 共用簡報 | 開啟 Google 共用簡報（需先在設定填 Apps Script 網址與密鑰） |
 | 收件匣、成果資料夾與設定 | 開啟資料夾，或設定 AI AGENT 資料夾、Python、Google 連線 |
 
-第一次使用會先要求指定 **AI AGENT 資料夾**（內含 `01_AI運行本體\程式` 的 Python 程式、範本與 `03_資料庫`）。
+第一次使用會先要求指定 **AI AGENT 資料夾**（內含 `03_資料庫` 的收件匣、問題庫、圖說索引，以及輸出用的 `04_成果`）。產生簡報與對照圖說用的 Python 程式**已內嵌在外掛中**，隨外掛更新，不再需要放在 AI AGENT 資料夾。
 
 ## 輸入、輸出與副作用
 
@@ -29,7 +29,7 @@
 | 輸出 | 收件匣 `item.json` 與截圖；釋疑簡報 `.pptx` |
 | 模型 | **不修改**。不開 Transaction，只讀取元素資訊與匯出視圖影像 |
 | 本機檔案 | 使用者指定的 AI AGENT 資料夾；`%APPDATA%\DT_AIAgent`（設定）；`%LOCALAPPDATA%\DT_AIAgent`（草稿） |
-| 外部程式 | 本機 Python 3。第一次產生簡報時以 `pip install --user` 安裝 `python-pptx`、`openpyxl` |
+| 外部程式 | 本機 Python 3。內嵌的 Python 程式解壓到 `%LOCALAPPDATA%\DT_AIAgent\python\<內容雜湊>\` 執行（同版本只解壓一次、舊版保留）。第一次產生簡報時以 `pip install --user` 安裝 `python-pptx`、`openpyxl`；對照圖說另需 `pymupdf`（見 `python/requirements.txt`） |
 | 網路（選用） | HTTPS 呼叫使用者自設的 Google Apps Script 網址。密鑰存在 `%APPDATA%\DT_AIAgent\gslides.json`，**不在程式碼內** |
 | Bridge／MCP | 不使用。沒有建立第二套 Bridge、Ribbon 啟動器、授權或 Updater |
 
@@ -41,6 +41,7 @@
 | `RfiDeckAgent.csproj` | SDK 格式 net48 類別庫，沿用 `../Directory.Build.props`，另加 WinForms 與 `System.Web.Extensions` |
 | `OpenCommand.cs` | 唯一入口：選單式 TaskDialog，分派到功能本體 |
 | `src/*.cs` | 功能本體（擷取、收件匣、簡報、Google 同步、設定），命名空間 `RfiDeckAgent.Core` |
+| `python/*.py` | 簡報產生（`revit_deck.py`、`gen_rfi_deck.py`、`pptx_tools.py`）、問題庫（`rfi_db.py`）、對照圖說（`seek_lookup.py`）、路徑與專案設定（`agent_paths.py`）。以 `EmbeddedResource` 內嵌進 `RfiDeckAgent.dll` |
 
 ## 來源與修改
 
@@ -50,6 +51,20 @@
 - 拿掉寫死的 `D:\` 路徑：未設定資料夾時先引導到設定。
 - 預設文字去掉特定專案名稱；命名空間由 `DT_AIAgent.Core` 改為 `RfiDeckAgent.Core`。
 - 設定與草稿資料夾名稱仍為 `DT_AIAgent`，與舊版資料相容。
+- Python 程式來源：`01_AI運行本體\程式`（2026-10-20 版）。改為從環境變數 `DT_AIAGENT_ROOT` 取得 AI AGENT 資料夾（外掛自動設定；單獨執行時仍以程式所在位置往上兩層推算）；問題庫檔名、圖說 PDF 資料夾、柱線對應棟別改由設定決定，程式內不含專案名稱。
+
+## 專案設定（`%APPDATA%\DT_AIAgent\seek.json`，選用）
+
+| 欄位 | 用途 | 省略時 |
+|---|---|---|
+| `rfi_db` | 釋疑問題庫 xlsx 路徑 | 在 `03_資料庫\釋疑問題庫` 找 `釋疑問題庫.xlsx`，或唯一的 `*釋疑問題庫.xlsx` |
+| `index` | 圖說查找索引 | `03_資料庫\圖說\圖說查找索引.db` |
+| `pdf_dir` | 圖說 PDF 資料夾 | 依索引中的檔名，在 `03_資料庫\圖說` 或其下一層自動尋找 |
+| `building_by_grid` | 數字柱線對應棟別，例如 `[[7, 17, "實驗棟"], [1, 6, "行政棟"]]` | 不由柱線推測棟別（樓層名稱前綴 `LB_`／`OB_` 仍會帶入棟別） |
+
+## 開發者：測試未發版的 Python 程式
+
+在 `%APPDATA%\DT_AIAgent\scripts_dir.txt` 寫入程式資料夾完整路徑（例如本機 clone 的 `DevelopmentTools.Modules\rfi-deck-agent\python`），外掛就會改用該資料夾，不必重新建置 DLL。刪除該檔即恢復使用內嵌版本。
 
 ## 已知限制
 
@@ -58,7 +73,7 @@
 
 ## 不放進 Repo
 
-專案圖資、DWG、建議書、產出成果、含真實人名的範例（客戶資料）；安裝檔、wheels、打包 zip、編譯結果；第三方反向工程資料。Python 簡報程式與範本（會議紀錄、簽到表、雙週會簡報、釋疑問題清單）目前仍在各使用者的 AI AGENT 資料夾，另案處理。
+專案圖資、DWG、建議書、產出成果、含真實人名的範例（客戶資料）；安裝檔、wheels、打包 zip、編譯結果；第三方反向工程資料。會議紀錄、簽到表、雙週會簡報等其他文書程式與範本（會議紀錄、簽到表、雙週會簡報、釋疑問題清單）仍在各使用者的 AI AGENT 資料夾，另案處理；本模組只內嵌 Revit 按鈕會呼叫的 Python 程式。
 
 ## 測試
 
